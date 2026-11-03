@@ -24,8 +24,8 @@ transaction size changed?
 7. **Forecast check:** NPCI reported about 25,470 million transactions for October 2026, inside the baseline forecast range of 24,936 to 26,448 million (point forecast 25,666).
 
 ## Dashboard
-![Page 1: overview](<dashboard_page1 (4).png>)
-![Page 2: forecast and yearly totals](dashboard_page2_final.png)
+![Page 1: overview](dashboard_page1.png)
+![Page 2: forecast and yearly totals](dashboard_page2.png)
 
 Power BI file: `power bi/upi_dashboard.pbix`
 
