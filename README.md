@@ -22,9 +22,15 @@ transaction size changed?
 
 ## Dashboard
 ![Page 1: overview](<dashboard_page1 (4).png>)
-![Page 2: forecast and yearly totals](<dashboard_page2 (3).png>)
+![Page 2: forecast and yearly totals](dashboard_page2_final.png)
 
 Power BI file: `power bi/upi_dashboard.pbix`
+
+## How to run
+1. Install the packages: `pip install pandas openpyxl statsmodels matplotlib`
+2. Clean the data: `python combine_upi.py`
+3. Run a SQL query: `python run_sql.py sql\01_growth.sql` (repeat for the other files in `sql/`)
+4. Run the forecast: `python forecast_upi.py`
 
 ## Data
 - Source: NPCI, UPI Product Statistics (monthly), npci.org.in
