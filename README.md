@@ -21,6 +21,7 @@ transaction size changed?
    January is the weakest month.
 6. **Forecast:** a baseline model projects about 314.6 bn transactions for
    October 2026 to September 2027, about 17% above the last 12 months.
+7. **Forecast check:** NPCI reported about 25,470 million transactions for October 2026, inside the baseline forecast range of 24,936 to 26,448 million (point forecast 25,666).
 
 ## Dashboard
 ![Page 1: overview](<dashboard_page1 (4).png>)
