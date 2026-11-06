@@ -32,7 +32,7 @@ Power BI file: `power bi/upi_dashboard.pbix`
 ## How to run
 1. Install the packages: `pip install pandas openpyxl statsmodels matplotlib`
 2. Clean the data: `python combine_upi.py`
-3. Run a SQL query: `python run_sql.py sql\01_growth.sql` (repeat for the other files in `sql/`)
+3. Run a SQL query: `python run_sql.py sql/01_growth.sql` (repeat for the other files in `sql/`)
 4. Run the forecast: `python forecast_upi.py`
 
 ## Data
