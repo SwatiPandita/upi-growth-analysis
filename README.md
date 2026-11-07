@@ -1,6 +1,6 @@
 # UPI Growth Analysis (April 2016 to September 2026)
 
-UPI volume grew from 0.02 bn to 241.6 bn transactions a year, but growth slowed from 106% to 30% while the average payment shrank from Rs 1,838 to Rs 1,301.
+UPI volume grew from 0.02 bn to 241.6 bn transactions a year, but growth slowed from 106% (FY22) to 30% (FY26), while the average payment fell from a FY21 peak of Rs 1,838 to Rs 1,301.
 
 ## Business question
 How fast has UPI grown in India, is growth slowing, and how has the average
