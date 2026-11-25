@@ -1,13 +1,13 @@
 # UPI Growth Analysis (April 2016 to September 2026)
 
-UPI volume grew from 0.02 bn to 241.6 bn transactions a year. Percentage growth slowed from 106% (FY22) to 30% (FY26), but UPI still added about 56 bn transactions in FY26, more than in any earlier year. The average payment fell from a FY21 peak of Rs 1,838 to Rs 1,301.
+UPI volume grew from 0.02 bn to 241.6 bn transactions a year. Percentage growth slowed from 106% (FY22) to 30% (FY26), but UPI still added about 56 bn transactions in FY26, more than in any earlier year. The average payment fell from a FY21 peak of Rs 1,838 (after the launch year) to Rs 1,301.
 
 ## Business question
 How fast has UPI grown in India, is growth slowing, and how has the average
 transaction size changed?
 
 **Who this is for:** a bank, payments company or fintech team planning capacity
-and product focus for UPI. [FILL: edit this line if your intended audience is different.]
+and product focus for UPI.
 
 ## Key findings
 1. **Scale:** UPI went from 0.02 bn transactions in FY2016-17 to 241.62 bn in
@@ -21,7 +21,10 @@ and product focus for UPI. [FILL: edit this line if your intended audience is di
    (+54.7 bn to +55.8 bn in the last year).
 4. **Still growing about 23% a year.** April to September 2026 volume was
    140.5 bn against 114.1 bn a year earlier (+23.2%), and value grew 19.6%.
-5. **The average ticket is falling.** It peaked at Rs 1,838 in FY2020-21 and
+   Some press reports give this half-year as about 145 bn (+27%). Summing
+   NPCI's monthly figures gives 140.5 bn, and value matches the press figure
+   (about Rs 177 lakh crore).
+5. **The average ticket is falling.** After the launch year it peaked at Rs 1,838 in FY2020-21 and
    was Rs 1,301 in FY2025-26. September 2026 was Rs 1,220. This is consistent
    with more small payments, but monthly totals cannot show which payment sizes
    are growing, so this is a hypothesis, not a finding.
@@ -35,13 +38,14 @@ and product focus for UPI. [FILL: edit this line if your intended audience is di
 7. **Forecast:** a baseline model projects about 314.6 bn transactions for
    October 2026 to September 2027, about 17% above the last 12 months.
 8. **Forecast spot check:** after the model was built, NPCI reported about
-   25,470 million transactions for October 2026 ([FILL: source link and date]).
+   25,470 million transactions for October 2026 ([Inc42 report](https://inc42.com/buzz/upi-transactions-rise-5-8-mom-to-record-25-47-bn-in-october/);
+   NPCI's monthly UPI product statistics are the primary source).
    This is inside the forecast range of 24,936 to 26,448 million (point forecast
-   25,666). October 2026 is not in the dataset used for the model, and one data
+   25,666, which is 0.8% above the reported figure). October 2026 is not in the
+   dataset used for the model, and one data
    point is a spot check, not proof that the forecast is reliable.
 
 ## What this means
-[FILL: edit these so each one follows from a finding you have confirmed.]
 - **Plan on absolute growth, not percentage growth.** If yearly additions keep
   rising (finding 3), capacity and monitoring needs still rise even as the percentage falls.
 - **Investigate payment mix next.** A falling average ticket (finding 5) should
@@ -55,15 +59,17 @@ and product focus for UPI. [FILL: edit this line if your intended audience is di
 ![Page 2: forecast and yearly totals](dashboard_page2.png)
 
 Power BI file: `power bi/upi_dashboard.pbix`
-PDF export of the dashboard: [FILL: add `dashboard.pdf` to the repo and link it here]
+PDF export of the dashboard: [`dashboard.pdf`](dashboard.pdf)
 
 ## How to run
-Requires Python [FILL: version you used, e.g. 3.11]. SQLite is included with Python.
+Requires Python 3 and the packages in `requirements.txt`. SQLite is included with Python.
 1. Install the packages: `pip install -r requirements.txt`
 2. Clean the data: `python combine_upi.py`
 3. Run a SQL query: `python run_sql.py sql/01_growth.sql` (repeat for the other files in `sql/`)
 4. Run the forecast: `python forecast_upi.py`
 5. Yearly additions: `python check_additions.py`
+6. Forecast checks (rolling backtest, start-date sensitivity, 80% range coverage):
+   `python rolling_backtest.py` (add `--model reference` for the independent scipy version)
 
 ## Data
 - Source: NPCI, UPI Product Statistics (monthly), npci.org.in
@@ -85,28 +91,46 @@ Requires Python [FILL: version you used, e.g. 3.11]. SQLite is included with Pyt
 - `check_additions.py`: yearly volume, percentage growth and absolute additions
 - `outputs/`: query results, `forecast.csv` and the forecast chart
 - `forecast_upi.py`: 12-month forecast with a backtest
+- `rolling_backtest.py`: rolling-origin backtest, start-date sensitivity and 80% range
+  coverage check (results saved in `outputs/rolling_backtest_*.txt`)
+- `dashboard.pdf`: PDF export of the two dashboard pages
+- `requirements.txt`: Python packages
 
 ## Method
 - SQL window functions (LAG) for growth rates. Seasonality uses average daily
   volume so 28, 30 and 31 day months are comparable.
 - Forecast: damped-trend Holt-Winters on log volume, trained on April 2021
-  onward. [FILL: one sentence on why April 2021, e.g. UPI's growth pattern
-  changed and earlier years would distort the trend. Use your real reason.]
+  onward. Starting earlier made the 12-month backtest worse (see the start-date
+  check below).
 - Backtest: the model was trained on April 2021 to September 2025 and asked to
   forecast the 12 months October 2025 to September 2026, which were hidden.
   Error is the average absolute percentage error on monthly volume. The model's
   average error was 1.3%. A naive baseline that repeats September 2025 for all
   12 months had an average error of 11.8%. A stronger baseline (same month last
   year, scaled by last year's growth) had 8.2%.
+- Robustness checks (`rolling_backtest.py`): the figures in this bullet come from an
+  independent re-implementation of the same model type (`--model reference`, saved in
+  `outputs/rolling_backtest_reference.txt`); `python rolling_backtest.py` runs the same
+  checks on the statsmodels model. Training from April 2019, 2020, 2021 and 2022 gave
+  12-month backtest errors of 7.1%, 2.4%, 0.9% and 1.9%. Across nine forecast origins,
+  error was 0.9% to 1.4% when the model had 45 or more months of training, and 4.5% to
+  16.8% with 30 to 42 months.
 
 ## Limitations
 - Early-year growth rates (for example about 5,000% in FY2017-18) come from a tiny
   starting base.
 - FY2026-27 covers April to September only, so its yearly growth figure is
   not comparable with full years.
-- The forecast is a statistical baseline from one backtest. It does not
-  predict policy changes, and its 80% range is probably too narrow.
+- The forecast is a statistical baseline. It does not predict policy changes.
+  Its 80% range has not been checked for coverage (`rolling_backtest.py` measures this).
+- The headline 1.3% backtest error comes from one holdout window with 54 months of
+  training. The rolling checks show similar error only when the model has 45 or more
+  months of training, so treat 1.3% as typical of the recent stable period, not as a
+  guarantee.
 - Only monthly totals were used. Bank-wise, app-wise and merchant-category data
   were not analysed, so claims about which payment types are growing cannot be
   tested here.
+- Monthly totals hide shocks to individual apps. The RBI action on Paytm Payments Bank
+  (31 January 2024) left no visible dent in the totals: average daily volume rose about
+  6% from January to February 2024. Measuring an event like this needs app-wise data.
 - Average ticket is in nominal rupees.
