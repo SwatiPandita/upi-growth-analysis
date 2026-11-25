@@ -100,21 +100,24 @@ Requires Python 3 and the packages in `requirements.txt`. SQLite is included wit
 - SQL window functions (LAG) for growth rates. Seasonality uses average daily
   volume so 28, 30 and 31 day months are comparable.
 - Forecast: damped-trend Holt-Winters on log volume, trained on April 2021
-  onward. Starting earlier made the 12-month backtest worse (see the start-date
-  check below).
+  onward. April 2021 gave the lowest backtest error of the four start dates tested
+  (see the robustness checks below).
 - Backtest: the model was trained on April 2021 to September 2025 and asked to
   forecast the 12 months October 2025 to September 2026, which were hidden.
   Error is the average absolute percentage error on monthly volume. The model's
   average error was 1.3%. A naive baseline that repeats September 2025 for all
   12 months had an average error of 11.8%. A stronger baseline (same month last
   year, scaled by last year's growth) had 8.2%.
-- Robustness checks (`rolling_backtest.py`): the figures in this bullet come from an
-  independent re-implementation of the same model type (`--model reference`, saved in
-  `outputs/rolling_backtest_reference.txt`); `python rolling_backtest.py` runs the same
-  checks on the statsmodels model. Training from April 2019, 2020, 2021 and 2022 gave
-  12-month backtest errors of 7.1%, 2.4%, 0.9% and 1.9%. Across nine forecast origins,
-  error was 0.9% to 1.4% when the model had 45 or more months of training, and 4.5% to
-  16.8% with 30 to 42 months.
+- Robustness checks (`rolling_backtest.py`, results in
+  `outputs/rolling_backtest_statsmodels.txt`): training from April 2019, 2020, 2021 and
+  2022 gave 12-month backtest errors of 6.7%, 4.0%, 1.3% and 2.4%. Across nine forecast
+  origins (September 2023 to September 2025, each forecasting 12 months), the average
+  error was 2.3%, against 13.8% for the naive baseline and 9.4% for the seasonal-growth
+  baseline. Error by origin ranged from 3.7% to 1.3% and fell as the training history
+  grew from 30 to 54 months. The 80% range contained the actual value in every case
+  (target: 80%), so it looks conservative. A separate scipy implementation of the model
+  (`--model reference`, saved in `outputs/rolling_backtest_reference.txt`) is a
+  cross-check only and was less accurate than the statsmodels model.
 
 ## Limitations
 - Early-year growth rates (for example about 5,000% in FY2017-18) come from a tiny
@@ -122,11 +125,12 @@ Requires Python 3 and the packages in `requirements.txt`. SQLite is included wit
 - FY2026-27 covers April to September only, so its yearly growth figure is
   not comparable with full years.
 - The forecast is a statistical baseline. It does not predict policy changes.
-  Its 80% range has not been checked for coverage (`rolling_backtest.py` measures this).
-- The headline 1.3% backtest error comes from one holdout window with 54 months of
-  training. The rolling checks show similar error only when the model has 45 or more
-  months of training, so treat 1.3% as typical of the recent stable period, not as a
-  guarantee.
+- The headline 1.3% backtest error is the best of nine rolling origins (average 2.3%,
+  range 1.3% to 3.7%), so a typical 12-month forecast should be expected to be off by
+  roughly 2%, not 1.3%.
+- The 80% range contained every actual value in the rolling checks, so it is probably
+  wider than needed. With only nine overlapping origins this is an indication, not a
+  precise coverage estimate.
 - Only monthly totals were used. Bank-wise, app-wise and merchant-category data
   were not analysed, so claims about which payment types are growing cannot be
   tested here.
