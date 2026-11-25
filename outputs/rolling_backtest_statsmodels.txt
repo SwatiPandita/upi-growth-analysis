@@ -1,0 +1,36 @@
+model: statsmodels | data: 2016-07 to 2026-09, 123 months | holdout origin: 2025-09
+
+A. Single backtest (train from 2021-04, hide the last 12 months)
+   statsmodels      MAPE 1.3%
+   naive            MAPE 11.8%
+   seasonal growth  MAPE 8.2%
+
+B. Start-date sensitivity (same holdout, origin 2025-09)
+   train from 2019-04: MAPE 6.7%
+   train from 2020-04: MAPE 4.0%
+   train from 2021-04: MAPE 1.3%
+   train from 2022-04: MAPE 2.4%
+
+C. Rolling origins (9 origins, 2023-09 to 2025-09, 12-month horizon each)
+   statsmodels MAPE 2.3% | naive 13.8% | seasonal growth 9.4%
+   MAPE by horizon (months ahead):
+   h1  h2  h3  h4  h5  h6  h7  h8  h9  h10 h11 h12
+   2.0 2.2 1.6 1.7 3.3 2.2 1.8 2.8 2.4 2.7 2.3 2.5
+   MAPE by origin:
+   origin 2023-09: 30 training months, MAPE 3.7%
+   origin 2023-12: 33 training months, MAPE 3.6%
+   origin 2024-03: 36 training months, MAPE 2.1%
+   origin 2024-06: 39 training months, MAPE 2.5%
+   origin 2024-09: 42 training months, MAPE 2.3%
+   origin 2024-12: 45 training months, MAPE 2.1%
+   origin 2025-03: 48 training months, MAPE 1.8%
+   origin 2025-06: 51 training months, MAPE 1.3%
+   origin 2025-09: 54 training months, MAPE 1.3%
+
+D. Share of actual values inside the 80% range, pooled over origins (target: 80%)
+   horizons 1-3: 100.0%
+   horizons 4-6: 100.0%
+   horizons 7-12: 100.0%
+   (9 overlapping origins: indicative, not a precise coverage estimate)
+
+E. One month ahead (2026-10): point 25,666 mn, 80% range 24,936 to 26,448
