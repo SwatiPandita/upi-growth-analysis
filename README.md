@@ -62,7 +62,7 @@ Power BI file: `power bi/upi_dashboard.pbix`
 PDF export of the dashboard: [`dashboard.pdf`](dashboard.pdf)
 
 ## How to run
-Requires Python 3 and the packages in `requirements.txt`. SQLite is included with Python.
+Requires Python 3.10 and the packages in `requirements.txt`. SQLite is included with Python.
 1. Install the packages: `pip install -r requirements.txt`
 2. Clean the data: `python combine_upi.py`
 3. Run a SQL query: `python run_sql.py sql/01_growth.sql` (repeat for the other files in `sql/`)
