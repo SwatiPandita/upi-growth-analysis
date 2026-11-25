@@ -38,7 +38,7 @@ and product focus for UPI.
 7. **Forecast:** a baseline model projects about 314.6 bn transactions for
    October 2026 to September 2027, about 17% above the last 12 months.
 8. **Forecast spot check:** after the model was built, NPCI reported about
-   25,470 million transactions for October 2026 ([Inc42 report](https://inc42.com/buzz/upi-transactions-rise-5-8-mom-to-record-25-47-bn-in-october/);
+   25,470 million transactions for October 2026 ([Inc42 report, 2 Nov 2026](https://inc42.com/buzz/upi-transactions-rise-5-8-mom-to-record-25-47-bn-in-october/));
    NPCI's monthly UPI product statistics are the primary source).
    This is inside the forecast range of 24,936 to 26,448 million (point forecast
    25,666, which is 0.8% above the reported figure). October 2026 is not in the
