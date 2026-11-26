@@ -44,11 +44,27 @@ and product focus for UPI.
    25,666, which is 0.8% above the reported figure). October 2026 is not in the
    dataset used for the model, and one data
    point is a spot check, not proof that the forecast is reliable.
+9. **Value grows more slowly than volume because the average ticket keeps falling.**
+   Since FY2022-23 the average ticket has fallen 9.2%, 8.3%, 8.1% and 7.2% a year, so
+   value growth trails volume growth: in FY2025-26 value rose 20.6% against 30.0% for
+   volume. The fall is slowing: April to September 2026 ticket size was down 2.9% year on
+   year, with value +19.6% against volume +23.2% (`decompose_growth.py`,
+   `outputs/growth_decomposition.csv`).
+10. **FY2026-27 outlook:** three simple scenarios give 292.9 to 297.6 bn transactions
+   for the full year (+21.2% to +23.2%): the same yearly addition as FY2025-26, the same
+   growth rate as April to September 2026, and actual April to September plus the model
+   forecast for the rest. None reaches 300 bn in FY2026-27 (`outputs/fy27_scenarios.csv`).
 
 ## What this means
-- **Plan on absolute growth, not percentage growth.** If yearly additions keep
-  rising (finding 3), capacity and monitoring needs still rise even as the percentage falls.
-- **Investigate payment mix next.** A falling average ticket (finding 5) should
+- **Size capacity on volume, not on value.** Plan for about 293 to 298 bn transactions in
+  FY2026-27 (finding 10). The model's busiest month, August 2027, averages about 0.90 bn
+  transactions a day against 0.80 bn in September 2026, about 13% more load in 11 months.
+  These are daily averages, so peak-hour and festival-day load will be higher.
+- **Expect value-linked income to grow slower than volume-linked cost.** Value grew 20.6%
+  against 30.0% for volume in FY2025-26 (finding 9). Anything priced per transaction
+  or driven by transaction count grows faster than anything driven by rupee value.
+  The ticket-size fall is slowing, so the gap should narrow.
+- **Investigate payment mix next.** The falling average ticket (finding 5) should
   be tested with NPCI's merchant-category and P2P/P2M tables, which this project
   did not use.
 - **Use the forecast as a baseline only.** Refresh it monthly and compare it with
@@ -57,6 +73,8 @@ and product focus for UPI.
 ## Dashboard
 ![Page 1: overview](dashboard_page1.png)
 ![Page 2: forecast and yearly totals](dashboard_page2.png)
+
+Interactive web dashboard: <https://swatipandita.github.io/upi-growth-analysis/> (source: `docs/index.html`, rebuilt with `python build_dashboard.py`)
 
 Power BI file: `power bi/upi_dashboard.pbix`
 PDF export of the dashboard: [`dashboard.pdf`](dashboard.pdf)
@@ -70,6 +88,8 @@ Requires Python 3.10 and the packages in `requirements.txt`. SQLite is included 
 5. Yearly additions: `python check_additions.py`
 6. Forecast checks (rolling backtest, start-date sensitivity, 80% range coverage):
    `python rolling_backtest.py` (add `--model reference` for the independent scipy version)
+7. Growth decomposition and FY2026-27 scenarios: `python decompose_growth.py`
+8. Rebuild the web dashboard: `python build_dashboard.py`
 
 ## Data
 - Source: NPCI, UPI Product Statistics (monthly), npci.org.in
@@ -93,6 +113,9 @@ Requires Python 3.10 and the packages in `requirements.txt`. SQLite is included 
 - `forecast_upi.py`: 12-month forecast with a backtest
 - `rolling_backtest.py`: rolling-origin backtest, start-date sensitivity and 80% range
   coverage check (results saved in `outputs/rolling_backtest_*.txt`)
+- `decompose_growth.py`: splits value growth into volume and average-ticket effects and
+  compares FY2026-27 scenarios (results in `outputs/growth_decomposition.csv`, `outputs/fy27_scenarios.csv`)
+- `build_dashboard.py` and `docs/index.html`: the interactive web dashboard
 - `dashboard.pdf`: PDF export of the two dashboard pages
 - `requirements.txt`: Python packages
 

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UPI Growth Analysis</title>
+<style>
+:root{color-scheme:light;--bg:#ffffff;--card:#f6f6f6;--text:#191919;--muted:#666666;--grid:#e3e3e3;
+--s1:#257de0;--s2:#f47230;--band:rgba(244,114,48,.16)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#191919;--card:#232323;--text:#efefef;--muted:#9c9c9c;--grid:#363636;--s1:#338ced;--s2:#e76624;--band:rgba(231,102,36,.2)}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:17px;margin:0 0 2px}
+.sub{color:var(--muted);margin:0 0 20px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--card);border-radius:10px;padding:12px 14px}.kpi b{display:block;font-size:24px}.kpi span{color:var(--muted);font-size:13px}
+.card{background:var(--card);border-radius:10px;padding:16px;margin-bottom:16px;position:relative}
+.card p{margin:0 0 10px;color:var(--muted);font-size:13.5px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin-bottom:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+svg{width:100%;height:auto;display:block;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:var(--bg);border:1px solid var(--grid);border-radius:8px;padding:6px 9px;font-size:12.5px;display:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:2}
+details{margin-top:8px;font-size:13px}table{border-collapse:collapse;width:100%;margin-top:6px}
+th,td{text-align:right;padding:3px 8px;border-bottom:1px solid var(--grid)}th:first-child,td:first-child{text-align:left}
+footer{color:var(--muted);font-size:12.5px;margin-top:20px}a{color:var(--s1)}
+</style>
+</head>
+<body>
+<main>
+<h1>UPI growth, April 2018 to September 2026</h1>
+<p class="sub">Percentage growth is slowing, absolute additions are not, and the average payment keeps shrinking. Source: NPCI UPI product statistics (monthly).</p>
+<div class="kpis" id="kpis"></div>
+
+<section class="card"><h2>Monthly transactions and 12-month forecast</h2>
+<p>Millions of transactions per month. Dashed line and band: forecast and 80% range from the model in <code>forecast_upi.py</code>.</p>
+<div class="legend"><span><i style="background:var(--s1)"></i>Actual</span><span><i style="background:var(--s2)"></i>Forecast (80% range shaded)</span></div>
+<div id="c1"></div><div class="tip" id="t1"></div></section>
+
+<section class="card"><h2>Yearly growth: volume against value</h2>
+<p>Value grows more slowly than volume because the average ticket has fallen about 7 to 9% a year since FY2022-23.</p>
+<div class="legend"><span><i style="background:var(--s1)"></i>Volume growth %</span><span><i style="background:var(--s2)"></i>Value growth %</span></div>
+<div id="c2"></div><div class="tip" id="t2"></div></section>
+
+<section class="card"><h2>Transactions added each year (billions)</h2>
+<p>The yearly addition is still rising even as the percentage falls.</p>
+<div id="c3"></div><div class="tip" id="t3"></div></section>
+
+<section class="card"><h2>Average ticket (Rs per transaction)</h2>
+<p>Value divided by volume, nominal rupees.</p>
+<div id="c4"></div><div class="tip" id="t4"></div>
+<details><summary>Show data table</summary><div id="tbl"></div></details></section>
+
+<footer>Forecast is a statistical baseline, not a prediction of policy changes. Code and method:
+<a href="https://github.com/SwatiPandita/upi-growth-analysis">github.com/SwatiPandita/upi-growth-analysis</a>.</footer>
+</main>
+<script>
+const D = {"monthly":[{"m":"2018-04","v":190.1},{"m":"2018-05","v":189.5},{"m":"2018-06","v":246.4},{"m":"2018-07","v":273.8},{"m":"2018-08","v":312.0},{"m":"2018-09","v":405.9},{"m":"2018-10","v":482.4},{"m":"2018-11","v":524.9},{"m":"2018-12","v":620.2},{"m":"2019-01","v":672.8},{"m":"2019-02","v":674.2},{"m":"2019-03","v":799.5},{"m":"2019-04","v":781.8},{"m":"2019-05","v":733.5},{"m":"2019-06","v":754.5},{"m":"2019-07","v":822.3},{"m":"2019-08","v":918.4},{"m":"2019-09","v":955.0},{"m":"2019-10","v":1148.4},{"m":"2019-11","v":1218.8},{"m":"2019-12","v":1308.4},{"m":"2020-01","v":1305.0},{"m":"2020-02","v":1325.7},{"m":"2020-03","v":1246.8},{"m":"2020-04","v":999.6},{"m":"2020-05","v":1234.5},{"m":"2020-06","v":1336.9},{"m":"2020-07","v":1497.4},{"m":"2020-08","v":1618.8},{"m":"2020-09","v":1800.1},{"m":"2020-10","v":2071.6},{"m":"2020-11","v":2210.2},{"m":"2020-12","v":2234.2},{"m":"2021-01","v":2302.7},{"m":"2021-02","v":2292.9},{"m":"2021-03","v":2731.7},{"m":"2021-04","v":2641.1},{"m":"2021-05","v":2539.6},{"m":"2021-06","v":2807.5},{"m":"2021-07","v":3247.8},{"m":"2021-08","v":3555.6},{"m":"2021-09","v":3654.3},{"m":"2021-10","v":4218.6},{"m":"2021-11","v":4186.5},{"m":"2021-12","v":4566.3},{"m":"2022-01","v":4617.1},{"m":"2022-02","v":4527.5},{"m":"2022-03","v":5405.6},{"m":"2022-04","v":5583.1},{"m":"2022-05","v":5955.2},{"m":"2022-06","v":5862.8},{"m":"2022-07","v":6288.4},{"m":"2022-08","v":6579.6},{"m":"2022-09","v":6780.8},{"m":"2022-10","v":7305.4},{"m":"2022-11","v":7309.4},{"m":"2022-12","v":7829.5},{"m":"2023-01","v":8036.9},{"m":"2023-02","v":7534.8},{"m":"2023-03","v":8685.3},{"m":"2023-04","v":8863.3},{"m":"2023-05","v":9415.2},{"m":"2023-06","v":9335.1},{"m":"2023-07","v":9964.6},{"m":"2023-08","v":10586.0},{"m":"2023-09","v":10555.7},{"m":"2023-10","v":11408.8},{"m":"2023-11","v":11235.3},{"m":"2023-12","v":12020.2},{"m":"2024-01","v":12203.0},{"m":"2024-02","v":12102.7},{"m":"2024-03","v":13440.0},{"m":"2024-04","v":13304.0},{"m":"2024-05","v":14035.8},{"m":"2024-06","v":13885.1},{"m":"2024-07","v":14435.5},{"m":"2024-08","v":14963.0},{"m":"2024-09","v":15041.8},{"m":"2024-10","v":16585.0},{"m":"2024-11","v":15482.0},{"m":"2024-12","v":16730.0},{"m":"2025-01","v":16996.0},{"m":"2025-02","v":16106.2},{"m":"2025-03","v":18301.5},{"m":"2025-04","v":17893.4},{"m":"2025-05","v":18677.5},{"m":"2025-06","v":18395.0},{"m":"2025-07","v":19468.0},{"m":"2025-08","v":20008.3},{"m":"2025-09","v":19633.4},{"m":"2025-10","v":20700.9},{"m":"2025-11","v":20467.0},{"m":"2025-12","v":21634.7},{"m":"2026-01","v":21703.4},{"m":"2026-02","v":20394.2},{"m":"2026-03","v":22641.1},{"m":"2026-04","v":22346.8},{"m":"2026-05","v":23201.9},{"m":"2026-06","v":22716.1},{"m":"2026-07","v":23658.3},{"m":"2026-08","v":24509.0},{"m":"2026-09","v":24068.4}],"forecast":[{"m":"2026-10","v":25666.0,"lo":24936.0,"hi":26448.0},{"m":"2026-11","v":24562.0,"lo":23728.0,"hi":25516.0},{"m":"2026-12","v":25781.0,"lo":24890.0,"hi":26752.0},{"m":"2027-01","v":25577.0,"lo":24572.0,"hi":26658.0},{"m":"2027-02","v":24008.0,"lo":23052.0,"hi":25125.0},{"m":"2027-03","v":26806.0,"lo":25613.0,"hi":28049.0},{"m":"2027-04","v":26473.0,"lo":25322.0,"hi":27731.0},{"m":"2027-05","v":26734.0,"lo":25523.0,"hi":28098.0},{"m":"2027-06","v":26171.0,"lo":24909.0,"hi":27568.0},{"m":"2027-07","v":27351.0,"lo":25997.0,"hi":28827.0},{"m":"2027-08","v":28026.0,"lo":26608.0,"hi":29605.0},{"m":"2027-09","v":27462.0,"lo":25963.0,"hi":29129.0}],"yearly":[{"fy":"FY2017-18","vol_bn":0.92,"ticket":1200,"vol_growth":null,"val_growth":null,"ticket_change":null,"added_bn":null},{"fy":"FY2018-19","vol_bn":5.39,"ticket":1627,"vol_growth":489.1,"val_growth":698.5,"ticket_change":35.5,"added_bn":4.5},{"fy":"FY2019-20","vol_bn":12.52,"ticket":1703,"vol_growth":132.2,"val_growth":143.1,"ticket_change":4.7,"added_bn":7.1},{"fy":"FY2020-21","vol_bn":22.33,"ticket":1838,"vol_growth":78.4,"val_growth":92.5,"ticket_change":7.9,"added_bn":9.8},{"fy":"FY2021-22","vol_bn":45.97,"ticket":1831,"vol_growth":105.8,"val_growth":105.1,"ticket_change":-0.4,"added_bn":23.6},{"fy":"FY2022-23","vol_bn":83.75,"ticket":1662,"vol_growth":82.2,"val_growth":65.4,"ticket_change":-9.2,"added_bn":37.8},{"fy":"FY2023-24","vol_bn":131.13,"ticket":1525,"vol_growth":56.6,"val_growth":43.6,"ticket_change":-8.3,"added_bn":47.4},{"fy":"FY2024-25","vol_bn":185.87,"ticket":1402,"vol_growth":41.7,"val_growth":30.3,"ticket_change":-8.1,"added_bn":54.7},{"fy":"FY2025-26","vol_bn":241.62,"ticket":1301,"vol_growth":30.0,"val_growth":20.6,"ticket_change":-7.2,"added_bn":55.8}]};
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const NS = "http://www.w3.org/2000/svg";
+const el = (n, a = {}, t) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; return e; };
+const fmt = (x, d = 0) => x.toLocaleString("en-IN", {maximumFractionDigits: d, minimumFractionDigits: d});
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const lab = m => MON[+m.slice(5) - 1] + " " + m.slice(0, 4);
+const W = 960, H = 320, P = {l: 56, r: 16, t: 12, b: 34};
+
+function frame(id, h = H) {
+  const host = document.getElementById(id); host.innerHTML = "";
+  const svg = el("svg", {viewBox: `0 0 ${W} ${h}`, role: "img"}); host.appendChild(svg); return {svg, host, h};
+}
+function axes(svg, h, ymax, yfmt, xticks, xs) {
+  const iy = v => P.t + (h - P.t - P.b) * (1 - v / ymax);
+  const step = ymax <= 10 ? 2 : ymax <= 60 ? 10 : ymax <= 150 ? 50 : ymax <= 400 ? 50 : ymax <= 1500 ? 200 : ymax <= 2500 ? 500 : 5000;
+  for (let v = 0; v <= ymax; v += step) {
+    svg.appendChild(el("line", {x1: P.l, x2: W - P.r, y1: iy(v), y2: iy(v), stroke: css("--grid"), "stroke-width": 1}));
+    svg.appendChild(el("text", {x: P.l - 8, y: iy(v) + 4, "text-anchor": "end", fill: css("--muted"), "font-size": 12}, yfmt(v)));
+  }
+  xticks.forEach(i => svg.appendChild(el("text", {x: xs(i), y: h - 10, "text-anchor": "middle", fill: css("--muted"), "font-size": 12}, xticks.labels[xticks.indexOf(i)])));
+  return iy;
+}
+function tipper(host, tip) {
+  return (html, x, y) => {
+    tip.innerHTML = html; tip.style.display = "block";
+    const r = host.getBoundingClientRect(), cr = host.parentElement.getBoundingClientRect();
+    const px = (x / W) * r.width + (r.left - cr.left), py = (y / H) * r.height + (r.top - cr.top);
+    tip.style.left = Math.min(px + 12, cr.width - tip.offsetWidth - 8) + "px"; tip.style.top = Math.max(py - 40, 0) + "px";
+  };
+}
+
+function kpis() {
+  const y = D.yearly, last = y[y.length - 1];
+  const items = [[fmt(last.vol_bn, 1) + " bn", "transactions in " + last.fy],
+    ["+" + fmt(last.vol_growth, 1) + "%", "volume growth, down from " + fmt(y.find(r => r.fy == "FY2021-22").vol_growth, 0) + "% in FY2021-22"],
+    ["+" + fmt(last.added_bn, 1) + " bn", "added in " + last.fy + ", the most in any year"],
+    ["Rs " + fmt(last.ticket), "average ticket, from Rs " + fmt(Math.max(...y.filter(r => r.fy != "FY2016-17").map(r => r.ticket))) + " at the FY2020-21 peak"]];
+  document.getElementById("kpis").innerHTML = items.map(i => `<div class="kpi"><b>${i[0]}</b><span>${i[1]}</span></div>`).join("");
+}
+
+function chart1() {
+  const {svg, host} = frame("c1"), tip = document.getElementById("t1"), show = tipper(host, tip);
+  const all = D.monthly.map(r => ({m: r.m, v: r.v})), fc = D.forecast;
+  const n = all.length + fc.length, ymax = 30000, xs = i => P.l + (W - P.l - P.r) * i / (n - 1);
+  const ticks = [], labels = [];
+  all.concat(fc).forEach((r, i) => { if (r.m.endsWith("-04") && +r.m.slice(0, 4) % 2 == 0) { ticks.push(i); labels.push("Apr " + r.m.slice(0, 4)); } });
+  ticks.labels = labels;
+  const iy = axes(svg, H, ymax, v => fmt(v / 1000) + "k", ticks, xs);
+  const band = fc.map((r, i) => `${xs(all.length + i)},${iy(r.hi)}`).concat(fc.slice().reverse().map((r, i) => `${xs(all.length + fc.length - 1 - i)},${iy(r.lo)}`));
+  svg.appendChild(el("polygon", {points: band.join(" "), fill: css("--band")}));
+  svg.appendChild(el("polyline", {points: all.map((r, i) => `${xs(i)},${iy(r.v)}`).join(" "), fill: "none", stroke: css("--s1"), "stroke-width": 2}));
+  const join = [all[all.length - 1]].concat(fc);
+  svg.appendChild(el("polyline", {points: join.map((r, i) => `${xs(all.length - 1 + i)},${iy(r.v)}`).join(" "), fill: "none", stroke: css("--s2"), "stroke-width": 2, "stroke-dasharray": "6 4"}));
+  const cross = el("line", {y1: P.t, y2: H - P.b, stroke: css("--muted"), "stroke-width": 1, visibility: "hidden"}); svg.appendChild(cross);
+  const hit = el("rect", {x: P.l, y: P.t, width: W - P.l - P.r, height: H - P.t - P.b, fill: "transparent"}); svg.appendChild(hit);
+  hit.addEventListener("mousemove", e => {
+    const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W;
+    const i = Math.max(0, Math.min(n - 1, Math.round((x - P.l) / (W - P.l - P.r) * (n - 1))));
+    const isF = i >= all.length, row = isF ? fc[i - all.length] : all[i];
+    cross.setAttribute("x1", xs(i)); cross.setAttribute("x2", xs(i)); cross.setAttribute("visibility", "visible");
+    show(`<b>${lab(row.m)}</b><br>${isF ? "Forecast" : "Actual"}: ${fmt(row.v)} mn` + (isF ? `<br>80% range: ${fmt(row.lo)} to ${fmt(row.hi)}` : ""), xs(i), iy(row.v));
+  });
+  hit.addEventListener("mouseleave", () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); });
+}
+
+function groupedBars(id, tid, rows, series, ymaxIn, yfmt, tipFn) {
+  const {svg, host} = frame(id), tip = document.getElementById(tid), show = tipper(host, tip);
+  const n = rows.length, bw = (W - P.l - P.r) / n, k = series.length, w = Math.min(34, (bw * 0.7) / k);
+  const xs = i => P.l + bw * (i + 0.5);
+  const ticks = rows.map((_, i) => i); ticks.labels = rows.map(r => r.fy.replace("FY", "").replace("20", "'").replace(/-/, "-"));
+  const iy = axes(svg, H, ymaxIn, yfmt, ticks, xs);
+  rows.forEach((r, i) => series.forEach((s, j) => {
+    const v = r[s.key]; if (v == null) return;
+    const x = xs(i) - (k * w) / 2 + j * w, y = iy(Math.max(v, 0)), h = Math.max(iy(0) - y, 1);
+    const b = el("rect", {x: x + 1, y, width: w - 2, height: h, rx: 3, fill: css(s.color)}); svg.appendChild(b);
+    b.addEventListener("mousemove", () => show(tipFn(r), xs(i), y)); b.addEventListener("mouseleave", () => tip.style.display = "none");
+  }));
+}
+
+function chart4() {
+  const rows = D.yearly.filter(r => r.fy != "FY2016-17" && r.ticket > 0);
+  const {svg, host} = frame("c4"), tip = document.getElementById("t4"), show = tipper(host, tip);
+  const n = rows.length, xs = i => P.l + (W - P.l - P.r) * (i + 0.5) / n, ymax = 2000;
+  const ticks = rows.map((_, i) => i); ticks.labels = rows.map(r => r.fy.replace("FY", "").replace("20", "'"));
+  const iy = axes(svg, H, ymax, v => fmt(v), ticks, xs);
+  svg.appendChild(el("polyline", {points: rows.map((r, i) => `${xs(i)},${iy(r.ticket)}`).join(" "), fill: "none", stroke: css("--s1"), "stroke-width": 2}));
+  rows.forEach((r, i) => {
+    const c = el("circle", {cx: xs(i), cy: iy(r.ticket), r: 5, fill: css("--s1"), stroke: css("--card"), "stroke-width": 2}); svg.appendChild(c);
+    const hit = el("circle", {cx: xs(i), cy: iy(r.ticket), r: 16, fill: "transparent"}); svg.appendChild(hit);
+    hit.addEventListener("mousemove", () => show(`<b>${r.fy}</b><br>Rs ${fmt(r.ticket)} per transaction` + (r.ticket_change == null ? "" : `<br>${r.ticket_change > 0 ? "+" : ""}${fmt(r.ticket_change, 1)}% vs previous year`), xs(i), iy(r.ticket)));
+    hit.addEventListener("mouseleave", () => tip.style.display = "none");
+  });
+}
+
+function table() {
+  const head = "<tr><th>Year</th><th>Volume (bn)</th><th>Volume growth %</th><th>Value growth %</th><th>Ticket (Rs)</th><th>Added (bn)</th></tr>";
+  const body = D.yearly.map(r => `<tr><td>${r.fy}</td><td>${fmt(r.vol_bn, 2)}</td><td>${r.vol_growth == null ? "" : fmt(r.vol_growth, 1)}</td><td>${r.val_growth == null ? "" : fmt(r.val_growth, 1)}</td><td>${fmt(r.ticket)}</td><td>${r.added_bn == null ? "" : fmt(r.added_bn, 1)}</td></tr>`).join("");
+  document.getElementById("tbl").innerHTML = "<table>" + head + body + "</table>";
+}
+
+function draw() {
+  kpis(); chart1();
+  const rows = D.yearly.filter(r => r.fy >= "FY2021-22");
+  groupedBars("c2", "t2", rows, [{key: "vol_growth", color: "--s1"}, {key: "val_growth", color: "--s2"}], 120, v => v + "%",
+    r => `<b>${r.fy}</b><br>Volume growth: ${fmt(r.vol_growth, 1)}%<br>Value growth: ${fmt(r.val_growth, 1)}%<br>Average ticket: ${r.ticket_change > 0 ? "+" : ""}${fmt(r.ticket_change, 1)}%`);
+  groupedBars("c3", "t3", D.yearly.filter(r => r.added_bn != null && r.fy >= "FY2019-20"), [{key: "added_bn", color: "--s1"}], 60, v => v,
+    r => `<b>${r.fy}</b><br>Added ${fmt(r.added_bn, 1)} bn transactions<br>Total ${fmt(r.vol_bn, 1)} bn`);
+  chart4(); table();
+}
+draw();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+</script>
+</body>
+</html>
